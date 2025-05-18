@@ -1,2 +1,2 @@
-# modules.js
-Relevant modules for JavaScript 
+# modules
+Relevant modules for JavaScript value manipulation and security. 
