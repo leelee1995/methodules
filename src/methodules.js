@@ -62,10 +62,6 @@ export const useUnion = (input, uTypes = []) => {
     let value = undefined;
 
     try {
-        const tvs = Object.values(TYPES); //  Type values
-        const ots = ["function", "object"]; // Object types
-        const it = TYPES[OPSCall(input)]; //  Input type
-
         // Check if input is of a valid type
         if (!Array.isArray(uTypes)) {
             throwError(`Must provide an array of types.`);
@@ -78,21 +74,29 @@ export const useUnion = (input, uTypes = []) => {
         if (new Set(uTypes).size !== uTypes.length) {
             throwError(`Array uTypes cannot have duplicates.`);
         }
+    } catch (error) {
+        console.error(error);
+    }
 
-        for (const ut of uTypes) {
+    const tvs = Object.values(TYPES); //  Type values
+    const ots = ["function", "object"]; // Object types
+    const it = TYPES[OPSCall(input)]; //  Input type
+
+    for (const ut of uTypes) {
+        try {
             // Check if ut is a valid type
             if (!tvs[ut] && !ots.includes(typeof ut)) {
                 throwError(
                     `The input union type(s) MUST have an array of: String, Number, BigInt, null, undefined, Boolean, Symbol and/or Array (and/or custom Arrays and/or custom Objects). See https://github.com/leelee1995/methodules`
                 );
             }
-
-            // Check if input matches the type in uTypes
-            if (it === ut || (ots.includes(typeof ut) && input === ut))
-                value = input;
+        } catch (error) {
+            console.error(error);
         }
-    } catch (error) {
-        console.error(error);
+
+        // Check if input matches the type in uTypes
+        if (it === ut || (ots.includes(typeof ut) && input === ut))
+            value = input;
     }
     return value;
 };
@@ -129,20 +133,30 @@ export const useStrictUnion = (initial, uTypes = [], limit = Infinity) => {
         if (typeof limit !== "number" || limit <= 0) {
             throwError(`Limit must be greater than zero.`);
         }
-
-        function setValue(newValue) {
-            // Check if newValue matches any of the specified types in uTypes
-            if (attempts >= limit) {
-                throwError(`Exceeded the maximum number of attempts: ${limit}`);
-            }
-            value = useUnion(newValue, uTypes);
-            attempts++;
-        }
     } catch (error) {
         console.error(error);
     }
 
-    return [value, setValue];
+    // Sets the new value
+    function setValue(newValue) {
+        try {
+            // Check if newValue matches any of the specified types in uTypes
+            if (attempts >= limit) {
+                throwError(`Exceeded the maximum number of attempts: ${limit}`);
+            }
+
+            attempts++;
+            value = useUnion(newValue, uTypes);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    function getValue() {
+        return value;
+    }
+
+    return [getValue, setValue];
 };
 
 /**
@@ -155,18 +169,21 @@ export const useStrictUnion = (initial, uTypes = [], limit = Infinity) => {
  * @since 05/29/2025
  */
 export const keySearch = (obj, key) => {
-    try {
-        if (OPSCall(obj) !== "[object Object]") {
-            throwError("The first argument must be an object.");
+    // Handle dot notation for nested keys
+    if (key.includes(".")) {
+        const parts = key.split(".");
+        let current = obj;
+        for (const part of parts) {
+            if (current && typeof current === "object" && part in current) {
+                current = current[part];
+            } else {
+                return undefined;
+            }
         }
-        if (!key && typeof key !== "string") {
-            throwError("The second argument must be a string.");
-        }
-    } catch (error) {
-        console.error(error);
-        return undefined;
+        return current;
     }
 
+    // Fallback to original recursive search
     for (const k in obj) {
         if (k === key) {
             return obj[k];
@@ -193,18 +210,6 @@ export const keySearch = (obj, key) => {
  * @since 05/29/2025
  */
 export const keySearchAll = (obj, key) => {
-    try {
-        if (OPSCall(obj) !== "[object Object]") {
-            throwError("The first argument must be an object.");
-        }
-        if (!key && typeof key !== "string") {
-            throwError("The second argument must be a string.");
-        }
-    } catch (error) {
-        console.error(error);
-        return [];
-    }
-
     const results = [];
 
     for (const k in obj) {
@@ -222,82 +227,6 @@ export const keySearchAll = (obj, key) => {
 };
 
 /**
- * @function valueSearch
- * @description - This function searches for a specific value in an object and returns the first key that matches.
- * @param {Object} obj - The object to search within.
- * @param {any} value - The value to search for.
- * @returns
- * @author leelee1995
- * @since 05/29/2025
- */
-export const valueSearch = (obj, value) => {
-    try {
-        if (OPSCall(obj) !== "[object Object]") {
-            throwError("The first argument must be an object.");
-        }
-        if (value === undefined) {
-            throwError("The second argument must not be undefined.");
-        }
-    } catch (error) {
-        console.error(error);
-        return undefined;
-    }
-
-    for (const k in obj) {
-        if (obj[k] === value) {
-            return k;
-        }
-
-        if (typeof obj[k] === "object" && obj[k] !== null) {
-            const result = valueSearch(obj[k], value);
-            if (result !== undefined) {
-                return result;
-            }
-        }
-    }
-
-    return undefined;
-};
-
-/**
- * @function valueSearchAll
- * @description - This function searches for all occurrences of a specific value in an object and returns an array of their keys.
- * @param {Object} obj - The object to search within.
- * @param {String} value
- * @returns
- * @author leelee1995
- * @since 05/29/2025
- */
-export const valueSearchAll = (obj, value) => {
-    try {
-        if (OPSCall(obj) !== "[object Object]") {
-            throwError("The first argument must be an object.");
-        }
-        if (value === undefined) {
-            throwError("The second argument must not be undefined.");
-        }
-    } catch (error) {
-        console.error(error);
-        return [];
-    }
-
-    const results = [];
-
-    for (const k in obj) {
-        if (obj[k] === value) {
-            results.push(k);
-        }
-
-        if (typeof obj[k] === "object" && obj[k] !== null) {
-            const nestedResults = valueSearchAll(obj[k], value);
-            results.push(...nestedResults);
-        }
-    }
-
-    return results;
-};
-
-/**
  * @function requestData
  * @description - This function fetches data from a given URL and returns the response as JSON.
  * @param {String} url - The URL to fetch data from.
@@ -307,21 +236,6 @@ export const valueSearchAll = (obj, value) => {
  * @since 05/29/2025
  */
 export const requestData = async (url, options = {}) => {
-    try {
-        if (typeof url !== "string" || !url) {
-            throw new Error("URL must be a non-empty string.");
-        }
-        if (!url.match(/^http[s]?:\/\//g)) {
-            throw new Error("URL must start with http:// or https://.");
-        }
-        if (typeof options !== "object" || options === null) {
-            throw new Error("Options must be a valid object.");
-        }
-    } catch (error) {
-        console.error("Invalid parameters:", error);
-        return [];
-    }
-
     return await fetch(url, options)
         .then((response) => {
             if (!response.ok) {
@@ -344,15 +258,6 @@ export const requestData = async (url, options = {}) => {
  * @since 05/29/2025
  */
 export const keyValueSwitch = (obj) => {
-    try {
-        if (OPSCall(obj) !== "[object Object]") {
-            throwError("The argument must be an object.");
-        }
-    } catch (error) {
-        console.error(error);
-        return {};
-    }
-
     const result = {};
     for (const key in obj) {
         if (obj.hasOwnProperty(key)) {
@@ -371,18 +276,11 @@ export const keyValueSwitch = (obj) => {
  * @since 05/29/2025
  */
 export const arrayShuffle = (arr) => {
-    try {
-        if (!Array.isArray(arr)) {
-            throwError("The argument must be an array.");
-        }
-    } catch (error) {
-        console.error(error);
-        return [];
-    }
+    const copy = [...arr]; // Create a copy of the array to avoid modifying the original
 
     for (let i = arr.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [arr[i], arr[j]] = [arr[j], arr[i]];
     }
-    return arr;
+    return copy;
 };
