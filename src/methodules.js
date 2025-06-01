@@ -23,6 +23,11 @@ const TYPES = Object.freeze({
     "[object Boolean]": Boolean,
     "[object Symbol]": Symbol,
     "[object Array]": Array,
+    "[object Object]": Object,
+    "[object Map]": Map,
+    "[object RegExp]": RegExp,
+    "[object Date]": Date,
+    "[object Promise]": Promise,
 });
 
 /**
@@ -48,6 +53,13 @@ function throwError(error) {
     throw new Error(error);
 }
 
+export function isObject(value) {
+    return (
+        typeof value === "object" &&
+        Object.prototype.toString.call(value) === "[object Object]"
+    );
+}
+
 /**
  * @function useUnion
  * @description - This function's purpose is to enforce the same type or object given for the new value.
@@ -65,39 +77,64 @@ export const useUnion = (input, uTypes = []) => {
         // Check if input is of a valid type
         if (!Array.isArray(uTypes)) {
             throwError(`Must provide an array of types.`);
+            return undefined;
         }
         // Check if uTypes is not empty
         if (!uTypes.length) {
             throwError(`The array of types must not be empty.`);
+            return undefined;
         }
         // Check for duplicates in uTypes
         if (new Set(uTypes).size !== uTypes.length) {
             throwError(`Array uTypes cannot have duplicates.`);
+            return undefined;
         }
+        // Check if input is of a valid type
+        if (typeof input === "function") {
+            throwError(
+                `New/initial value cannot be a function. If the intended new/initial value is to be a function, use an arrow function. Otherwise, please provide a new/initial primitive or object value.`
+            );
+            return undefined;
+        }
+        uTypes.forEach((ut) => {
+            // Check if union type (ut) is a valid type
+            if (
+                !Object.values(TYPES).includes(ut) &&
+                typeof ut !== "function"
+            ) {
+                throwError(
+                    `One of the given union type is not any of the primitive, object or constructor function. Please provide a valid type. See https://github.com/leelee1995/methodules for more information.`
+                );
+                return undefined;
+            }
+        });
     } catch (error) {
         console.error(error);
     }
 
-    const tvs = Object.values(TYPES); //  Type values
-    const ots = ["function", "object"]; // Object types
-    const it = TYPES[OPSCall(input)]; //  Input type
-
+    // Iterate through the union types and check if input matches any of them
     for (const ut of uTypes) {
-        try {
-            // Check if ut is a valid type
-            if (!tvs[ut] && !ots.includes(typeof ut)) {
-                throwError(
-                    `The input union type(s) MUST have an array of: String, Number, BigInt, null, undefined, Boolean, Symbol and/or Array (and/or custom Arrays and/or custom Objects). See https://github.com/leelee1995/methodules`
-                );
+        // Check if input is of the same type as ut
+        if (typeof input === "object") {
+            if (input === null && ut === null) {
+                value = input;
+                break;
             }
-        } catch (error) {
-            console.error(error);
+            if (input.constructor === ut) {
+                value = input;
+                break;
+            }
+
+            continue;
         }
 
-        // Check if input matches the type in uTypes
-        if (it === ut || (ots.includes(typeof ut) && input === ut))
+        // Check if input is a primitive type and matches the union type
+        if (TYPES[OPSCall(input)] === ut) {
             value = input;
+            break;
+        }
     }
+
     return value;
 };
 

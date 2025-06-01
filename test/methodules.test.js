@@ -12,133 +12,115 @@ import {
  * Function: useUnion(any, {object | function}[]);
  */
 
-//  -- String --
-test('Sets variable to a primitive string. uTypes: ["string"]', () => {
-    const s = useUnion("hello", ["string"]);
+test("Setting variable to various values. Union types: String, Number, BigInt, Symbol, Array, Map, Date, Object, null and undefined", () => {
+    //  String
+    let value = useUnion("javascript", [String]);
 
-    expect(s).toBeUndefined();
-});
-test("Sets variable to a primitive string. uTypes: [String]", () => {
-    const s = useUnion("hello", [String]);
+    expect(value).not.toBeUndefined();
+    expect(Object.prototype.toString.call(value)).toEqual("[object String]");
+    expect(value).toEqual("javascript");
 
-    expect(Object.prototype.toString.call(s)).toEqual("[object String]");
-    expect(s).toBe("hello");
-});
+    //  Number
+    value = useUnion(42, [Number]);
 
-//  -- Number --
-test("Sets variable to a primitive number. uTypes: [Number]", () => {
-    const n = useUnion(5, [Number]);
+    expect(value).not.toBeUndefined();
+    expect(Object.prototype.toString.call(value)).toEqual("[object Number]");
+    expect(value).toEqual(42);
 
-    expect(Object.prototype.toString.call(n)).toEqual("[object Number]");
-    expect(n).toBe(5);
-});
+    //  String and Number
+    value = useUnion("Hello World", [String, Number]);
 
-//  -- BigInt --
-test("Sets variable to a primitive bigint. uTypes: [BigInt]", () => {
-    const n = useUnion(5n, [BigInt]);
+    expect(value).not.toBeUndefined();
+    expect(Object.prototype.toString.call(value)).toEqual("[object String]");
+    expect(value).toEqual("Hello World");
 
-    expect(Object.prototype.toString.call(n)).toEqual("[object BigInt]");
-    expect(n).toBe(5n);
-});
-//  -- Function --
-test("Sets variable to sum function. uType: [sum]", () => {
-    function sum(x, y) {
-        return x + y;
+    value = useUnion(123, [String, Number]);
+
+    expect(value).not.toBeUndefined();
+    expect(Object.prototype.toString.call(value)).toEqual("[object Number]");
+    expect(value).toEqual(123);
+
+    //  BigInt
+    value = useUnion(BigInt(123456789), [BigInt]);
+
+    expect(value).not.toBeUndefined();
+    expect(Object.prototype.toString.call(value)).toEqual("[object BigInt]");
+    expect(value).toEqual(BigInt(123456789));
+
+    //  Symbol
+    value = useUnion(Symbol("unique"), [Symbol]);
+    expect(value).not.toBeUndefined();
+    expect(Object.prototype.toString.call(value)).toEqual("[object Symbol]");
+    expect(value.toString()).toEqual("Symbol(unique)");
+
+    //  Array
+    value = useUnion([1, 2, 3], [Array]);
+    expect(value).not.toBeUndefined();
+    expect(Object.prototype.toString.call(value)).toEqual("[object Array]");
+    expect(value).toEqual([1, 2, 3]);
+
+    //  Map
+    value = useUnion(
+        new Map([
+            ["key1", "value1"],
+            ["key2", "value2"],
+        ]),
+        [Map]
+    );
+    expect(value).not.toBeUndefined();
+    expect(Object.prototype.toString.call(value)).toEqual("[object Map]");
+    expect(value.get("key1")).toEqual("value1");
+    expect(value.get("key2")).toEqual("value2");
+    expect(value.size).toEqual(2);
+
+    //  Date
+    const date = new Date("2025-05-29T00:00:00Z");
+    value = useUnion(date, [Date]);
+    expect(value).not.toBeUndefined();
+    expect(Object.prototype.toString.call(value)).toEqual("[object Date]");
+    expect(value.toISOString()).toEqual("2025-05-29T00:00:00.000Z");
+    expect(value.getFullYear()).toEqual(2025);
+
+    //  Object
+    value = useUnion({ key: "value" }, [Object]);
+    expect(value).not.toBeUndefined();
+    expect(Object.prototype.toString.call(value)).toEqual("[object Object]");
+    expect(value.key).toEqual("value");
+
+    //  null
+    value = useUnion(null, [null]);
+    expect(value).toBeNull();
+    expect(Object.prototype.toString.call(value)).toEqual("[object Null]");
+
+    //  undefined
+    value = useUnion(undefined, [undefined]);
+    expect(value).toBeUndefined();
+    expect(Object.prototype.toString.call(value)).toEqual("[object Undefined]");
+
+    //  Constructor function
+    function Person(name, age) {
+        this.name = name;
+        this.age = age;
     }
 
-    const f = useUnion(sum, [sum]);
+    value = useUnion(new Person("Alice", 30), [Person]);
+    expect(value).not.toBeUndefined();
+    expect(Object.prototype.toString.call(value)).toEqual("[object Object]");
+    expect(value.name).toEqual("Alice");
+    expect(value.age).toEqual(30);
 
-    expect(Object.prototype.toString.call(f)).toEqual("[object Function]");
-    expect(f).toEqual(sum);
-});
-test("Sets variable to subtract function. uType: [subtract]", () => {
-    const subtract = (a, b) => {
-        return a - b;
-    };
+    //  Custom array
+    const customArray = [1, 2, 3];
 
-    const f = useUnion(subtract, [subtract]);
+    value = useUnion([...customArray], [Array]);
+    expect(value).not.toBeUndefined();
+    expect(Object.prototype.toString.call(value)).toEqual("[object Array]");
+    expect(value).toEqual(customArray);
+    expect(value.length).toEqual(3);
 
-    expect(Object.prototype.toString.call(f)).toEqual("[object Function]");
-    expect(f).toEqual(subtract);
-});
-
-//  -- Undefined --
-test("Sets variable to undefined. uType: [undefined]", () => {
-    const u = useUnion(undefined, [undefined]);
-
-    expect(u).toBeUndefined();
-});
-
-//  -- Null --
-test("Sets variable to null. uType: [null]", () => {
-    const nu = useUnion(null, [null]);
-
-    expect(nu).toBeNull();
-});
-
-//  -- Boolean --
-test("Sets variable to a boolean. uTypes: [Boolean]", () => {
-    const b = useUnion(true, [Boolean]);
-
-    expect(b).not.toBeUndefined();
-    expect(typeof b).toEqual("boolean");
-    expect(b).toBeTruthy();
-});
-
-//  -- Array --
-test("Sets variable to a string array. uType: [Array]", () => {
-    const arr = useUnion(["hello", "world"], [Array]);
-
-    expect(arr).not.toBeUndefined();
-    expect(Object.prototype.toString.call(arr)).toEqual("[object Array]");
-    expect(arr).toEqual(["hello", "world"]);
-});
-test("Sets variable to a string array, test. uType: [test]", () => {
-    const test = ["hello", "world"];
-    const arr = useUnion(test, [test]);
-
-    expect(arr).not.toBeUndefined();
-    expect(Object.prototype.toString.call(arr)).toEqual("[object Array]");
-    expect(arr).toEqual(test);
-});
-
-//  -- Multi union types --
-
-//  TRUTHY
-test("Sets variable to a string. uTypes: [Array, String]", () => {
-    const s = useUnion("javascript", [Array, String]);
-
-    expect(Object.prototype.toString.call(s)).not.toEqual("[object Array]");
-    expect(Object.prototype.toString.call(s)).toEqual("[object String]");
-    expect(s).toBe("javascript");
-});
-test("Sets variable to a string array, test. uType: [test, String]", () => {
-    const test = ["hello", "world"];
-
-    const arr = useUnion(test, [test, String]);
-
-    expect(Object.prototype.toString.call(arr)).not.toEqual("[object String]");
-    expect(Object.prototype.toString.call(arr)).toEqual("[object Array]");
-    expect(arr).toEqual(test);
-});
-
-//  FALSEY
-test("Sets variable to a number. uTypes: [Array, String]", () => {
-    const n = useUnion(2, [Array, String]);
-
-    expect(Object.prototype.toString.call(n)).not.toEqual("[object Array]");
-    expect(Object.prototype.toString.call(n)).not.toEqual("[object String]");
-    expect(n).toBeUndefined();
-});
-test("Sets variable to String function, test. uType: [test, String]", () => {
-    const test = ["hello", "world"];
-
-    const arr = useUnion(String, [test, String]);
-
-    expect(Object.prototype.toString.call(arr)).not.toEqual("[object Array]");
-    expect(Object.prototype.toString.call(arr)).not.toEqual("[object String]");
-    expect(arr).not.toEqual(test);
-    expect(arr).toEqual(String);
+    //  Falsey
+    value = useUnion(new Person("Bob", 25), [Object]);
+    expect(value).toBeUndefined();
 });
 
 /**
@@ -153,6 +135,7 @@ test("Sets variable to a string. uTypes: [Array, String], limit: 1", () => {
     expect(Object.prototype.toString.call(value())).toEqual("[object String]");
     expect(value()).toEqual("javascript");
 
+    // Set to string
     setValue("hello");
     expect(Object.prototype.toString.call(value())).not.toEqual(
         "[object Array]"
@@ -160,6 +143,7 @@ test("Sets variable to a string. uTypes: [Array, String], limit: 1", () => {
     expect(Object.prototype.toString.call(value())).toEqual("[object String]");
     expect(value()).toEqual("hello");
 
+    // Set to an array
     setValue(["world"]);
     expect(Object.prototype.toString.call(value())).not.toEqual(
         "[object Array]"
