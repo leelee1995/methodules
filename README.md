@@ -7,15 +7,15 @@ Relevant/useful reusable methods for JavaScript. Documents of methods are listed
 
 [`useStrictUnion`](#usestrictunionvalue-any-types-any-limit-number)) - This function will enforce an initialized variable to use the given types everytime a, initialized variable is set to a new value. (Note: limit is default to `Infinity`).
 
-[`keySearch`](keysearchobject-any-key-string) - This function will search and return the first matching value.
+[`keySearch`](#keysearchobject-any-key-string) - This function will search and return the first matching value.
 
-`keySearchAll(object: any{}, key: String)` - This function will search all and return all matching values.
+[`keySearchAll`](#keysearchallobject-any--any-key-string) - This function will search all and return all matching values.
 
-`requestData(url: String, option: any{})` - This function will make any request from a desired API server.
+[`requestData`](#requestdataurl-string-option-object) - This function will make any request from a desired API server.
 
-`keyValueSwitch(object: any{})` - This function will switch all keys and values.
+[`keyValueSwitch`](#keyvalueswitchobject-any) - This function will switch all keys and values.
 
-`arrayShuffle(array: any[])` - This function will shuffle an array.
+[`arrayShuffle`](#arrayshufflearray-any) - This function will shuffle an array.
 
 # `useUnion(value: any, types: any[])`
 
@@ -127,4 +127,61 @@ function Person(name, age) {
 
 const p1 = new Person('Alice', 45);
 
-console.log(keySearch(p1, )
+console.log(keySearch(p1, name); //  'Alice'
+```
+
+# `keySearchAll(object: any[] | any{}, key: String)`
+
+Like [`keySearch()`](#keysearchobject-any-key-string), this function accepts an array of objects or a complex object, and returns all values of the same key.
+
+```
+function Person(name, age) {
+  this.name = name;
+  this.age = age;
+}
+
+const people = [new Person('John', 35), new Person('Jane', 35)];
+
+console.log(keySearchAll(people, name)); //  ['John', 'Jane']
+```
+
+# `requestData(url: String, option: Object)`
+
+First argument MUST be a URL string STARTING with 'http://' or 'https://'. Second argument is an object of options to add `headers`, `method`, `body`, etc.
+
+It is highly recommend to use `async` and `await` keywords for this function due to `fetch()` method is promise-based. Using these keywords for readability and error handling.
+
+```
+import { requestData } from "../methodules.js"
+
+const data = async () => {
+  return await fetchData("https://jsonplaceholder.typicode.com/posts/1", {method: 'GET'});
+};
+
+//  Another way
+async function getData(url, option) {
+  return await fetchData(url, option);
+}
+```
+
+# `keyValueSwitch(object: any{})`
+
+Self-explanatory. Pass in an object to switch the keys and values. (This will copy the referrenced object).
+
+```
+const a = { a: 1, b: 2 };
+const b = keyValueSwitch(a);
+
+console.log(a);  //  { a: 1, b: 2 }
+console.log(b);  //  { 1: a, 2: b }
+```
+
+# `arrayShuffle(array: any[])`
+
+Self-explanatory. Pass in an array to be shuffled. (This will copy the referrenced array).
+
+```
+const arr = [1,2,3,4,5];
+
+console.log(arrayShuffle(arr));  //  possibilities: [2,4,3,5,1], [1,3,4,2,5], ...
+```
