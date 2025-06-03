@@ -116,11 +116,21 @@ export const useUnion = (input, uTypes = []) => {
     for (const ut of uTypes) {
         // Check if input is of the same type as ut
         if (typeof input === "object") {
-            if (input === null && ut === null) {
-                value = input;
-                break;
+            try {
+                if (
+                    ut === uTypes[uTypes.length - 1] &&
+                    input !== null &&
+                    input.constructor !== ut
+                ) {
+                    throwError(
+                        `Initial/new value type does not match any of the union types provided.`
+                    );
+                    return;
+                }
+            } catch (error) {
+                console.error(error);
             }
-            if (input.constructor === ut) {
+            if ((input === null && ut === null) || input.constructor === ut) {
                 value = input;
                 break;
             }

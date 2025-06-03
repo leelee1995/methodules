@@ -118,7 +118,7 @@ test("Setting variable to various values. Union types: String, Number, BigInt, S
     expect(value).toEqual(customArray);
     expect(value.length).toEqual(3);
 
-    //  Falsey
+    //  Falsey - this should throw an error
     value = useUnion(new Person("Bob", 25), [Object]);
     expect(value).toBeUndefined();
 });
@@ -143,7 +143,7 @@ test("Sets variable to a string. uTypes: [Array, String], limit: 1", () => {
     expect(Object.prototype.toString.call(value())).toEqual("[object String]");
     expect(value()).toEqual("hello");
 
-    // Set to an array
+    // Set to an array - this should throw an error
     setValue(["world"]);
     expect(Object.prototype.toString.call(value())).not.toEqual(
         "[object Array]"

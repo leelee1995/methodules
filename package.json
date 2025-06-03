@@ -1,35 +1,35 @@
 {
-  "name": "modules",
-  "version": "1.0.0",
-  "description": "Relevant modules for JavaScript value manipulation and security.",
-  "main": "index.js",
-  "directories": {
-    "test": "test"
-  },
-  "scripts": {
-    "test": "jest"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/leelee1995/modules.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "module",
-  "bugs": {
-    "url": "https://github.com/leelee1995/modules/issues"
-  },
-  "homepage": "https://github.com/leelee1995/modules#readme",
-  "devDependencies": {
-    "@babel/core": "^7.27.1",
-    "@babel/preset-env": "^7.27.2",
-    "babel-jest": "^29.7.0",
-    "jest": "^29.7.0"
-  },
-  "jest": {
-    "transform": {
-      "^.+\\.js$": "babel-jest"
+    "name": "methodules",
+    "version": "1.0.0",
+    "description": "Relevant methodules for JavaScript value manipulation and security.",
+    "main": "index.js",
+    "directories": {
+        "test": "test"
+    },
+    "scripts": {
+        "test": "jest"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/leelee1995/methodules.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "type": "module",
+    "bugs": {
+        "url": "https://github.com/leelee1995/methodules/issues"
+    },
+    "homepage": "https://github.com/leelee1995/methodules#readme",
+    "devDependencies": {
+        "@babel/core": "^7.27.1",
+        "@babel/preset-env": "^7.27.2",
+        "babel-jest": "^29.7.0",
+        "jest": "^29.7.0"
+    },
+    "jest": {
+        "transform": {
+            "^.+\\.js$": "babel-jest"
+        }
     }
-  }
 }
