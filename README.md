@@ -1,11 +1,15 @@
 # Methodules
-Relevant/useful reusable methods for JavaScript. Documents of methods are listed and linked below:
+Relevant/useful reusable methods for JavaScript.
+
+# Installation
+
+`npm i methodules`
 
 # Methods
 
 [`useUnion`](#useunionvalue-any-types-any) - This function will enforce the same type or object given for the new value.
 
-[`useStrictUnion`](#usestrictunionvalue-any-types-any-limit-number)) - This function will enforce an initialized variable to use the given types everytime a, initialized variable is set to a new value. (Note: limit is default to `Infinity`).
+[`useStrictUnion`](#usestrictunionvalue-any-types-any-limit-number) - This function will enforce an initialized variable to use the given types everytime a, initialized variable is set to a new value. (Note: limit is default to `Infinity`).
 
 [`keySearch`](#keysearchobject-any-key-string) - This function will search and return the first matching value.
 
