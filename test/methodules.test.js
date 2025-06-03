@@ -6,7 +6,7 @@ import {
     requestData,
     keyValueSwitch,
     arrayShuffle,
-} from "../src/methodules.js";
+} from "../methodules.js";
 
 /**
  * Function: useUnion(any, {object | function}[]);
